@@ -44,6 +44,13 @@ function pushCommand(cmd) {
 
 function completeToken(pref) {
   const prompt = document.getElementById("prompt-input");
+
+  // TODO: Autocomplete on commands
+  let commands = pref.split(' ')
+  if (commands.length == 1) {
+    focusPrompt();
+    return;
+  }
   
   // Extract out correct pathPrefix and incomplete pathSuffix
   let pathPrefix = (pref.split(' ')[1] + 'a').split('/');
