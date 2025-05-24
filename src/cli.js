@@ -104,6 +104,10 @@ function handleKeyPresses(e) {
         return pushCommand(commandHistory[commandHistoryCursor]);
       }
       break;
+    case "Tab":
+      e.preventDefault();
+      const curr_input = document.getElementById("prompt-input");
+      return completeToken(curr_input.value);
     default:
       break;
   }

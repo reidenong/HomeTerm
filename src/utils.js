@@ -42,6 +42,46 @@ function pushCommand(cmd) {
   focusPrompt();
 }
 
+function completeToken(pref) {
+  const prompt = document.getElementById("prompt-input");
+  
+  // Extract out correct pathPrefix and incomplete pathSuffix
+  let pathPrefix = (pref.split(' ')[1] + 'a').split('/');
+  let pathSuffix = pathPrefix.pop().slice(0, -1);  // Remove the last character
+  pathPrefix = pathPrefix.join('/');
+
+  // Find possible autocomplete targets
+  let targets = list([pathPrefix]);
+  if (!Array.isArray(targets)) {
+    focusPrompt();
+    return;
+  }
+
+  // Initialize possible match variable
+  let possible = '';
+
+  // Iterate over targets to find matching keys
+  for (let i = 0; i < targets.length; i++) {
+    let { key, _ } = targets[i];
+
+    // Have found unique (so far) match
+    if (key.includes(pathSuffix) && !possible) {
+      possible = key;
+    }
+    // Multiple options, pass
+    else if (key.startsWith(pathSuffix)) {
+      focusPrompt();
+      return;
+    }
+  }
+
+  // Construct final prompt value
+  const result = `${pref.split(' ')[0]} ${pathPrefix}${pathPrefix ? '/' : ''}${possible}`;
+  prompt.value = result;
+  focusPrompt();
+}
+
+
 // Returns link url if link or cursor if directory
 // Throw error if bad path
 function locatePath(path) {
