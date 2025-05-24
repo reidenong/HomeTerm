@@ -107,6 +107,7 @@ function handleKeyPresses(e) {
     case "Tab":
       e.preventDefault();
       const curr_input = document.getElementById("prompt-input");
+      if (curr_input.value == '') break;
       return completeToken(curr_input.value);
     default:
       break;
