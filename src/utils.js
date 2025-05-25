@@ -45,9 +45,16 @@ function pushCommand(cmd) {
 function completeToken(pref) {
   const prompt = document.getElementById("prompt-input");
 
-  // TODO: Autocomplete on commands
-  let commands = pref.split(' ')
-  if (commands.length == 1) {
+  // Autocomplete for commands
+  const cmdParts = pref.split(' ');
+  if (cmdParts.length === 1) {
+    const prefix = cmdParts[0];
+    const matches = Object.keys(COMMANDS).filter(cmd => cmd.startsWith(prefix));
+
+    if (matches.length === 1) {
+      prompt.value = matches[0] + ' ';
+    }
+
     focusPrompt();
     return;
   }
