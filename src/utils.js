@@ -58,7 +58,7 @@ function completeToken(pref) {
     focusPrompt();
     return;
   }
-  
+
   // Extract out correct pathPrefix and incomplete pathSuffix
   let pathPrefix = (pref.split(' ')[1] + 'a').split('/');
   let pathSuffix = pathPrefix.pop().slice(0, -1);  // Remove the last character
@@ -87,6 +87,11 @@ function completeToken(pref) {
       focusPrompt();
       return;
     }
+  }
+
+  if (possible == '') {
+    focusPrompt();
+    return;
   }
 
   // Construct final prompt value
