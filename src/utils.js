@@ -42,6 +42,82 @@ function pushCommand(cmd) {
   focusPrompt();
 }
 
+function completeToken(pref) {
+  const prompt = document.getElementById("prompt-input");
+
+  // Autocomplete for commands
+  const cmdParts = pref.split(' ');
+  if (!pref.startsWith('./') && cmdParts.length === 1) {
+    const prefix = cmdParts[0];
+    const matches = Object.keys(COMMANDS).filter(cmd => cmd.startsWith(prefix));
+
+    if (matches.length === 1) {
+      prompt.value = matches[0] + ' ';
+    }
+
+    focusPrompt();
+    return;
+  }
+
+  // Extract out correct pathPrefix and incomplete pathSuffix
+  var pathPrefix;
+  if (pref.startsWith('./')) {
+    pathPrefix = (pref.slice(2) + '_').split('/');
+  } else {
+    pathPrefix = (pref.split(' ')[1] + '_').split('/');
+  }
+
+  let pathSuffix = pathPrefix.pop().slice(0, -1);  // Remove the last character
+  pathPrefix = pathPrefix.join('/');
+
+  // Find possible autocomplete targets
+  let targets = list([pathPrefix]);
+  if (!Array.isArray(targets)) {
+    focusPrompt();
+    return;
+  }
+
+  // Initialize possible match variable
+  let possible = '';
+
+  // Iterate over targets to find matching keys
+  for (let i = 0; i < targets.length; i++) {
+    let { key, _ } = targets[i];
+
+    // Have found unique (so far) match
+    if (key.includes(pathSuffix) && !possible) {
+      possible = key;
+    }
+    // Multiple options, pass
+    else if (key.startsWith(pathSuffix)) {
+      focusPrompt();
+      return;
+    }
+  }
+
+  if (possible == '') {
+    focusPrompt();
+    return;
+  }
+
+  // Construct final prompt value
+  var result;
+  if (pref.startsWith('./')) {
+    result = "./";
+  } else {
+    result = pref.split(' ')[0] + ' ';
+  }
+  result += pathPrefix;
+  if (pathPrefix) {
+    result += '/'
+  }
+  result += possible;
+
+  prompt.value = result;
+  focusPrompt();
+}
+
+
 // Returns link url if link or cursor if directory
 // Throw error if bad path
 function locatePath(path) {
@@ -105,13 +181,21 @@ function replacePrompt() {
 
 // Parse command input by keeping strings in "" together as an single item
 function parseCommand(input) {
-  const re = /"([^"]+)"|([^\s]+)/g;
+
+  // New open syntax.
   const parsedCmd = [];
+  if (input.startsWith("./")) {
+    parsedCmd.push("./");
+    input = input.slice(2);
+  }
+
+  const re = /"([^"]+)"|([^\s]+)/g;
   let temp;
   while ((temp = re.exec(input)) !== null) {
     const val = temp[1] || temp[2]; // Get the correct capture group
     parsedCmd.push(val);
   }
+  console.log(parsedCmd);
   return parsedCmd;
 }
 

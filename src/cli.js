@@ -2,7 +2,8 @@
 const COMMANDS = {
   ls: { func: joinWriter(list, treeWriter), help: "usage: ls [<path to dir>]" },
   cd: { func: joinWriter(cd, textWriter), help: "usage: cd [<path>]" },
-  open: { func: joinWriter(openLink, textWriter), help: "usage: open <path>" },
+  './': { func: joinWriter(openLink, textWriter), help: "usage: ./<path>" },
+  open: { func: joinWriter(openRedirect, textWriter), help: "usage: ./<path>" },
   touch: {
     func: joinWriter(touch, textWriter),
     help: "usage: touch <path to link> <url>",
@@ -104,6 +105,11 @@ function handleKeyPresses(e) {
         return pushCommand(commandHistory[commandHistoryCursor]);
       }
       break;
+    case "Tab":
+      e.preventDefault();
+      const curr_input = document.getElementById("prompt-input");
+      if (curr_input.value == '') break;
+      return completeToken(curr_input.value);
     default:
       break;
   }
