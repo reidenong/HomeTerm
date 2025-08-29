@@ -48,6 +48,10 @@ function cd(input) {
   position = [];
 }
 
+function openRedirect(input) {
+  return COMMANDS.open.help;
+}
+
 function openLink(input) {
   if (input.length) {
     try {

@@ -47,7 +47,7 @@ function completeToken(pref) {
 
   // Autocomplete for commands
   const cmdParts = pref.split(' ');
-  if (cmdParts.length === 1) {
+  if (!pref.startsWith('./') && cmdParts.length === 1) {
     const prefix = cmdParts[0];
     const matches = Object.keys(COMMANDS).filter(cmd => cmd.startsWith(prefix));
 
@@ -60,7 +60,13 @@ function completeToken(pref) {
   }
 
   // Extract out correct pathPrefix and incomplete pathSuffix
-  let pathPrefix = (pref.split(' ')[1] + 'a').split('/');
+  var pathPrefix;
+  if (pref.startsWith('./')) {
+    pathPrefix = (pref.slice(2) + '_').split('/');
+  } else {
+    pathPrefix = (pref.split(' ')[1] + '_').split('/');
+  }
+
   let pathSuffix = pathPrefix.pop().slice(0, -1);  // Remove the last character
   pathPrefix = pathPrefix.join('/');
 
@@ -95,7 +101,18 @@ function completeToken(pref) {
   }
 
   // Construct final prompt value
-  const result = `${pref.split(' ')[0]} ${pathPrefix}${pathPrefix ? '/' : ''}${possible}`;
+  var result;
+  if (pref.startsWith('./')) {
+    result = "./";
+  } else {
+    result = pref.split(' ')[0] + ' ';
+  }
+  result += pathPrefix;
+  if (pathPrefix) {
+    result += '/'
+  }
+  result += possible;
+
   prompt.value = result;
   focusPrompt();
 }
@@ -164,13 +181,21 @@ function replacePrompt() {
 
 // Parse command input by keeping strings in "" together as an single item
 function parseCommand(input) {
-  const re = /"([^"]+)"|([^\s]+)/g;
+
+  // New open syntax.
   const parsedCmd = [];
+  if (input.startsWith("./")) {
+    parsedCmd.push("./");
+    input = input.slice(2);
+  }
+
+  const re = /"([^"]+)"|([^\s]+)/g;
   let temp;
   while ((temp = re.exec(input)) !== null) {
     const val = temp[1] || temp[2]; // Get the correct capture group
     parsedCmd.push(val);
   }
+  console.log(parsedCmd);
   return parsedCmd;
 }
 

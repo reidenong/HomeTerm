@@ -1,4 +1,15 @@
-# HomeTerm
+# (Reiden's) HomeTerm
+
+> Welcome to reiden's fork of the original HomeTerm!
+>
+> This repo is a fork of Jared's HomeTerm project, but with certain changes deemed necessary for regular usage.
+>
+> Key changes:
+> - Added tab autocomplete, **super** necessary for any terminal user.
+> - Replaced `open <path>` with `./<path>` to be more aligned with conventional terminal usage. After all, each link behaves a binary that opens a new page.
+>
+> Enjoy!
+
 
 A homepage disguised as a toy terminal!
 
@@ -19,7 +30,7 @@ Here are the currently available commands that can be run on the terminal.
 | `ls`     | `ls [<path to dir>]`              | List children of current working directory or given directory.                                                                                                                       |
 | `tree`   | `tree [<path to dir>]`            | Lists all children of current working directory or given directory in tree format                                                                                                    |
 | `cd`     | `cd [<path>]`                     | Move into given directory. If no path given move to root.                                                                                                                            |
-| `open`   | `open <path to link>`             | Open a link in a new tab.                                                                                                                                                            |
+| `open`   | `./<path to link>`                | Open a link in a new tab.                                                                                                                                                            |
 | `touch`  | `touch <path to link> <url>`      | Create a new link                                                                                                                                                                    |
 | `mkdir`  | `mkdir <path to dir>`             | Create a new directory                                                                                                                                                               |
 | `rm`     | `rm <path to link>`               | Delete link                                                                                                                                                                          |
