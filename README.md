@@ -78,7 +78,7 @@ Your TermPage file structure is stored in your browsers LocalStorage, if you enc
 - `export` and `import` for sharing your file structure with other machines
 - ~~Tree view for `ls`, and url view for `ls`~~
 - ~~Add flags for search to change search engine~~
-- Tab complete for commands and paths
+- Tab complete for commands and paths (done)
 
 ### Themes
 
