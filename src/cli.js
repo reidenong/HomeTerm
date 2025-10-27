@@ -12,10 +12,6 @@ const COMMANDS = {
     func: joinWriter(mkdir, textWriter),
     help: "usage: mkdir <path to dir>",
   },
-  theme: {
-    func: joinWriter(theme, ulWriter),
-    help: "usage: theme <theme name>",
-  },
   rm: { func: joinWriter(rm, textWriter), help: "usage: rm <link path>" },
   rmdir: {
     func: joinWriter(rmdir, textWriter),
