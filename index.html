@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HomeTerm</title>
   <link rel="icon" type="image/png" href="favicon.png" sizes="512x512" />
-
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Source+Code+Pro:wght@500&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
@@ -26,15 +25,13 @@
     <div id="terminal-content"></div>
   </div>
 
-  <!-- <a class="github-link" href="https://github.com/reidenong/HomeTerm">Contribute on GitHub</a> -->
-
+  <!-- Optional inline manifest for file:// usage -->
   <script id="wallpapers-manifest" type="application/json">
-["forest.jpg", "lake.jpg", "avatar.jpg", "fuji.jpg", "mfog.jpg", "rice.jpg", "river.jpg", "road.jpg", "rock.jpg", "snow.jpg", "vol.jpg"]
-</script>
-
+    ["forest.jpg","lake.jpg","avatar.jpg","fuji.jpg","mfog.jpg","rice.jpg","river.jpg","road.jpg","rock.jpg","snow.jpg","vol.jpg"]
+  </script>
 
   <script>
-    // Wallpaper: try wallpapers/index.json first; else probe common filenames.
+    // Wallpaper with DPR-aware picking and randomization
     (async function setWallpaper() {
       const DPR = Math.min(window.devicePixelRatio || 1, 3);
       const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
@@ -46,7 +43,6 @@
         document.body.classList.add('has-wallpaper');
       };
 
-      // Try manifest (supports simple array or variant objects)
       let list = null;
       try {
         const el = document.getElementById('wallpapers-manifest');
@@ -59,7 +55,6 @@
         } catch { }
       }
 
-      // Build candidates with DPR variants
       let candidates = [];
       if (Array.isArray(list)) {
         for (const item of list) {
@@ -75,36 +70,26 @@
             );
           } else if (item && item.variants) {
             const v = item.variants;
-            // prefer closest <= DPR
             if (DPR >= 3 && v['3x']) candidates.push(`wallpapers/${v['3x']}`);
             if (DPR >= 2 && v['2x']) candidates.push(`wallpapers/${v['2x']}`);
             if (v['1x']) candidates.push(`wallpapers/${v['1x']}`);
           }
         }
       } else {
-        // Heuristic guesses
         const names = ['wallpaper', 'background', 'bg', 'home', 'default', 'main', 'jw'];
         const exts = ['avif', 'webp', 'jpg', 'jpeg', 'png'];
         for (const n of names) for (const e of exts) {
-          candidates.push(`wallpapers/${n}@3x.${e}`, `wallpapers/${n}-3x.${e}`,
+          candidates.push(
+            `wallpapers/${n}@3x.${e}`, `wallpapers/${n}-3x.${e}`,
             `wallpapers/${n}@2x.${e}`, `wallpapers/${n}-2x.${e}`,
-            `wallpapers/${n}.${e}`);
+            `wallpapers/${n}.${e}`
+          );
         }
       }
 
-      // Dedup while preserving order
       candidates = [...new Set(candidates)];
-      function shuffle(a) {
-        for (let i = a.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [a[i], a[j]] = [a[j], a[i]];
-        }
-        return a;
-      }
-      shuffle(candidates);
+      shuffle(candidates); // ensure random choice each load
 
-
-      // Pick the first that loads and is large enough; otherwise accept the largest
       let bestURL = null, bestPixels = 0;
       for (const url of candidates) {
         const meta = await loadInfo(url);
@@ -122,6 +107,10 @@
           img.onerror = () => resolve(null);
           img.src = url + `?t=${Date.now()}`;
         });
+      }
+      function shuffle(a) {
+        for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; }
+        return a;
       }
     })();
 
@@ -156,24 +145,32 @@
     function showTerminal() {
       term.classList.remove('hidden'); term.classList.add('show');
       if (typeof window.focusPrompt === 'function') window.focusPrompt();
-      let tries = 0; const t = setInterval(() => { if (focusPromptHard() || ++tries >= 10) clearInterval(t); }, 16);
+      let tries = 0;
+      const t = setInterval(() => { if (focusPromptHard() || ++tries >= 10) clearInterval(t); }, 16);
     }
     function hideTerminal() { term.classList.remove('show'); term.classList.add('hidden'); }
     function isPrintable(e) { return e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey; }
 
+    // Keep focus if prompt re-renders
     new MutationObserver(() => { if (term.classList.contains('show')) focusPromptHard(); })
       .observe(termContent, { childList: true, subtree: true });
 
+    // Open terminal on key; forward first character; keep focus inside
     window.addEventListener('keydown', (e) => {
       const visible = term.classList.contains('show');
+
       if (!visible) {
-        if (isPrintable(e) || e.key === 'Backspace' || e.key === 'Enter') {
+        if (isPrintable(e) || e.key === 'Backspace' || e.key === 'Enter' || e.key === 'Tab') {
           e.preventDefault();
           const first = e.key;
           showTerminal();
           setTimeout(() => {
             const el = getPrompt(); if (!el) return;
-            if (isPrintable({ key: first, ctrlKey: false, metaKey: false, altKey: false })) {
+            if (first === 'Tab') {
+              // trigger CLI autocomplete right away
+              el.focus();
+              el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+            } else if (isPrintable({ key: first, ctrlKey: false, metaKey: false, altKey: false })) {
               const s = el.selectionStart ?? el.value.length;
               const t = el.selectionEnd ?? el.value.length;
               if (typeof el.setRangeText === 'function') el.setRangeText(first, s, t, 'end');
@@ -188,9 +185,27 @@
         }
         return;
       }
+
       if (e.key === 'Escape') { e.preventDefault(); hideTerminal(); return; }
       if (!term.contains(document.activeElement)) focusPromptHard();
     });
+
+    // Critical: capture Tab to prevent browser focus traversal, but let CLI receive it
+    window.addEventListener('keydown', (e) => {
+      if (!term.classList.contains('show')) return;
+      if (e.key === 'Tab') {
+        e.preventDefault(); // stop browser from moving focus
+        const prompt = getPrompt();
+        if (prompt && document.activeElement !== prompt) {
+          prompt.focus({ preventScroll: true });
+          if ('selectionStart' in prompt) {
+            const v = prompt.value;
+            prompt.selectionStart = prompt.selectionEnd = v.length;
+          }
+        }
+        // do not stopPropagation; CLI input's keydown handler still runs
+      }
+    }, { capture: true });
   </script>
 
   <script src="src/constants.js"></script>
