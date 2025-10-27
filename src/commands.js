@@ -10,13 +10,16 @@ function list(input) {
   try {
     const cursor = path ? locatePath(path) : getCurrentCursor();
     if (locationType(cursor) === types.DIR) {
-      return Object.entries(cursor).map(([key, value]) => {
-        const type = locationType(value);
-        return {
-          key: type === types.DIR ? `/${key}` : key,
-          type,
-        };
-      });
+      return Object.entries(cursor)
+        .sort(([aKey], [bKey]) => aKey.localeCompare(bKey))
+        .map(([key, value]) => {
+          const type = locationType(value);
+          return {
+            key: type === types.DIR ? `/${key}` : key,
+            type,
+          };
+        });
+
     }
   } catch (err) {
     return err;
