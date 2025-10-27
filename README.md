@@ -4,9 +4,6 @@
 >
 > This repo is a fork of Jared's HomeTerm project, but with huge changes that makes it extremely different visually.
 >
-> Key changes:
-> - Added tab autocomplete, **super** necessary for any terminal user.
-> - Replaced `open <path>` with `./<path>` to be more aligned with conventional terminal usage. After all, each link behaves a binary that opens a new page.
 >
 > Enjoy!
 
