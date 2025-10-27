@@ -37,4 +37,11 @@ Here are the currently available commands that can be run on the terminal.
 | `theme`  | `theme [<theme name>]`            | Change theme.                                                                                                                                                                        |
 | `mv`     | `mv <source path> <target path>`  | "Move" file or directory. Allows for renaming/moving resources within the file tree.                                                                                                 |
 | `edit`   | `edit <link path> <url>`          | Change the URL value for a given link.                                                                                                                                               |
-| `help`   | `help [<command>]`                | Get information on commands.                                                                                                                                                         |
+| `help`   | `help [<command>]`                | Get information on commands.              
+
+Privacy Policy for HomeTerm
+HomeTerm does not collect, store, or transmit any personal data.
+All processing occurs locally within your browser. No information
+is sent to external servers or third parties.
+
+If you have any questions, contact me.
