@@ -120,8 +120,15 @@ body.has-wallpaper {
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
-  /* best-effort fill */
-  background-attachment: fixed;
+  /* best-effort fill without distortion */
+  /* Avoid Chrome blurring on high-DPR when fixed */
+  background-attachment: scroll;
+}
+
+@media (min-width: 900px) and (max-resolution: 1.5dppx) {
+  body.has-wallpaper {
+    background-attachment: fixed;
+  }
 }
 
 /* Home dashboard */

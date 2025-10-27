@@ -27,67 +27,91 @@
   <a class="github-link" href="https://github.com/reidenong/HomeTerm">Contribute on GitHub</a>
 
   <script id="wallpapers-manifest" type="application/json">
-["jw.jpg"]
+["forest.jpg", "lake.jpg"]
 </script>
 
 
   <script>
     // Wallpaper: try wallpapers/index.json first; else probe common filenames.
     (async function setWallpaper() {
-      const set = (url) => {
-        if (!url) return;
+      const DPR = Math.min(window.devicePixelRatio || 1, 3);
+      const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+      const vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+      const needW = Math.round(vw * DPR), needH = Math.round(vh * DPR);
+
+      const setBG = (url) => {
         document.body.style.backgroundImage = `url("${url}")`;
         document.body.classList.add('has-wallpaper');
       };
 
-      // 0) Inline <script type="application/json" id="wallpapers-manifest">
+      // Try manifest (supports simple array or variant objects)
+      let list = null;
       try {
         const el = document.getElementById('wallpapers-manifest');
-        if (el && el.textContent.trim()) {
-          const files = JSON.parse(el.textContent);
-          if (Array.isArray(files) && files.length) {
-            const pick = files[Math.floor(Math.random() * files.length)];
-            set(`wallpapers/${encodeURIComponent(pick)}`);
-            return;
-          }
-        }
+        if (el && el.textContent.trim()) list = JSON.parse(el.textContent);
       } catch { }
-
-      // 1) External manifest (works only when served over http:// or https://)
-      try {
-        const res = await fetch('wallpapers/index.json', { cache: 'no-store' });
-        if (res.ok) {
-          const files = await res.json();
-          if (Array.isArray(files) && files.length) {
-            const pick = files[Math.floor(Math.random() * files.length)];
-            set(`wallpapers/${encodeURIComponent(pick)}`);
-            return;
-          }
-        }
-      } catch { }
-
-      // 2) Guesses
-      const names = ['wallpaper', 'background', 'bg', 'home', 'default', 'main', 'jw'];
-      const exts = ['webp', 'jpg', 'jpeg', 'png', 'gif', 'avif'];
-      const nums = Array.from({ length: 100 }, (_, i) => String(i + 1));
-      const candidates = [
-        ...names.flatMap(n => exts.map(e => `${n}.${e}`)),
-        ...nums.flatMap(n => exts.map(e => `${n}.${e}`))
-      ].map(f => `wallpapers/${f}`);
-
-      for (const url of shuffle(candidates)) {
-        if (await probe(url)) { set(url); break; }
+      if (!list) {
+        try {
+          const res = await fetch('wallpapers/index.json', { cache: 'no-store' });
+          if (res.ok) list = await res.json();
+        } catch { }
       }
 
-      function probe(url) {
+      // Build candidates with DPR variants
+      let candidates = [];
+      if (Array.isArray(list)) {
+        for (const item of list) {
+          if (typeof item === 'string') {
+            const base = item.replace(/\.(\w+)$/, '');
+            const ext = (item.match(/\.(\w+)$/) || [])[0] || '';
+            candidates.push(
+              `wallpapers/${base}@3x${ext}`,
+              `wallpapers/${base}-3x${ext}`,
+              `wallpapers/${base}@2x${ext}`,
+              `wallpapers/${base}-2x${ext}`,
+              `wallpapers/${base}${ext}`
+            );
+          } else if (item && item.variants) {
+            const v = item.variants;
+            // prefer closest <= DPR
+            if (DPR >= 3 && v['3x']) candidates.push(`wallpapers/${v['3x']}`);
+            if (DPR >= 2 && v['2x']) candidates.push(`wallpapers/${v['2x']}`);
+            if (v['1x']) candidates.push(`wallpapers/${v['1x']}`);
+          }
+        }
+      } else {
+        // Heuristic guesses
+        const names = ['wallpaper', 'background', 'bg', 'home', 'default', 'main', 'jw'];
+        const exts = ['avif', 'webp', 'jpg', 'jpeg', 'png'];
+        for (const n of names) for (const e of exts) {
+          candidates.push(`wallpapers/${n}@3x.${e}`, `wallpapers/${n}-3x.${e}`,
+            `wallpapers/${n}@2x.${e}`, `wallpapers/${n}-2x.${e}`,
+            `wallpapers/${n}.${e}`);
+        }
+      }
+
+      // Dedup while preserving order
+      candidates = [...new Set(candidates)];
+
+      // Pick the first that loads and is large enough; otherwise accept the largest
+      let bestURL = null, bestPixels = 0;
+      for (const url of candidates) {
+        const meta = await loadInfo(url);
+        if (!meta) continue;
+        const pixels = meta.w * meta.h;
+        if (pixels > bestPixels) { bestPixels = pixels; bestURL = url; }
+        if (meta.w >= needW && meta.h >= needH) { setBG(url); return; }
+      }
+      if (bestURL) setBG(bestURL);
+
+      function loadInfo(url) {
         return new Promise((resolve) => {
           const img = new Image();
-          img.onload = () => resolve(true);
-          img.onerror = () => resolve(false);
+          img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight, url });
+          img.onerror = () => resolve(null);
           img.src = url + `?t=${Date.now()}`;
         });
       }
-      function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } return a; }
     })();
 
     // Clock + greeting
