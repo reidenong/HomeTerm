@@ -2,22 +2,19 @@
 
 > Welcome to reiden's fork of the original HomeTerm!
 >
-> This repo is a fork of Jared's HomeTerm project, but with certain changes deemed necessary for regular usage.
+> This repo is a fork of Jared's HomeTerm project, but with huge changes that makes it extremely different visually.
 >
-> Key changes:
-> - Added tab autocomplete, **super** necessary for any terminal user.
-> - Replaced `open <path>` with `./<path>` to be more aligned with conventional terminal usage. After all, each link behaves a binary that opens a new page.
 >
 > Enjoy!
 
+A homepage with terminal utilities!
 
-A homepage disguised as a toy terminal!
+![alt text](/media/image.png)
+![alt text](/media/image2.png)
 
-![HomeTerm](/media/HomeTerm.png)
-
-- Dynamic prompt to interact with bookmarks
-- Built in Google search
-- Multiple themes with command for switching easily
+- Mouse free link navigation and management
+- Command autocomplete
+- Beautiful wallpapers
 - Command history for repeating commands easily
 - Stores bookmarks on your machine so they persist past your session
 
