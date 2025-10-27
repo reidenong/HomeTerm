@@ -1,4 +1,30 @@
-// ===== Wallpaper loader (uses wallpapers/index.json if present) =====
+// Disable spellcheck/autocorrect site-wide, including dynamically created prompts
+function neuterEditing(root = document) {
+    const els = root.querySelectorAll('input, textarea, [contenteditable]');
+    els.forEach(el => {
+        el.spellcheck = false;
+        el.autocomplete = 'off';
+        el.autocapitalize = 'off';
+        el.setAttribute('autocorrect', 'off');
+        el.setAttribute('data-gramm', 'false');              // Grammarly off
+        el.setAttribute('data-enable-grammarly', 'false');   // Grammarly off
+    });
+}
+document.documentElement.setAttribute('spellcheck', 'false');
+document.body.setAttribute('spellcheck', 'false');
+neuterEditing();
+
+// Keep it off for elements your terminal creates later
+new MutationObserver(m => {
+    for (const r of m) for (const n of r.addedNodes) {
+        if (n.nodeType !== 1) continue;
+        if (n.matches?.('input, textarea, [contenteditable]')) neuterEditing(n);
+        else neuterEditing(n);
+    }
+}).observe(document.documentElement, { childList: true, subtree: true });
+
+
+
 // ===== Wallpaper loader (MV3-safe) =====
 // Minimal MV3-safe wallpaper loader
 (async function setWallpaper() {
