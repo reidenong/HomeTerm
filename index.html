@@ -5,6 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HomeTerm</title>
+  <link rel="icon" type="image/png" href="favicon.png" sizes="512x512" />
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Source+Code+Pro:wght@500&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
@@ -27,7 +29,7 @@
   <a class="github-link" href="https://github.com/reidenong/HomeTerm">Contribute on GitHub</a>
 
   <script id="wallpapers-manifest" type="application/json">
-["forest.jpg", "lake.jpg"]
+["forest.jpg", "lake.jpg", "avatar.jpg", "fuji.jpg", "mfog.jpg", "rice.jpg", "river.jpg", "road.jpg", "rock.jpg", "snow.jpg", "vol.jpg"]
 </script>
 
 
@@ -92,6 +94,15 @@
 
       // Dedup while preserving order
       candidates = [...new Set(candidates)];
+      function shuffle(a) {
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      shuffle(candidates);
+
 
       // Pick the first that loads and is large enough; otherwise accept the largest
       let bestURL = null, bestPixels = 0;

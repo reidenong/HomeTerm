@@ -172,6 +172,7 @@ body.has-wallpaper {
   margin-bottom: 12px;
 }
 
+
 /* Terminal overlay */
 .terminal {
   position: fixed;
@@ -369,4 +370,36 @@ body.has-wallpaper {
 
 .github-link:hover {
   opacity: 1
+}
+
+/* global soft tint over wallpaper for readability */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center,
+      rgba(0, 0, 0, 0.35) 0%,
+      rgba(0, 0, 0, 0.25) 30%,
+      rgba(0, 0, 0, 0.15) 60%,
+      rgba(0, 0, 0, 0.07) 80%,
+      rgba(0, 0, 0, 0.03) 100%);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* keep page content above the tint */
+.home,
+.github-link {
+  position: relative;
+  z-index: 1;
+}
+
+/* keep terminal fixed and on top */
+.terminal {
+  z-index: 20;
+  /* higher than overlay */
+  position: fixed;
+  /* do NOT let later rules change this */
 }
