@@ -19,7 +19,12 @@ A homepage with terminal utilities!
 - Stores bookmarks on your machine so they persist past your session
 
 ## How to use
-The main reason why I adopted HomeTerm was to reduce my mouse reliance. HomeTerm has made the no mouse journey more enjoyable than ever before: create, view, organize and navigate your links all from the comfort of the command line! To get started is very simple:
+The main reason why I adopted HomeTerm was to reduce my mouse reliance. HomeTerm is designed like a file system
+-  files are like executables that take you to your page
+-  folders are like organizers that you can use to group your links together
+and this really makes the user experience very intuitable and straightforward.
+
+ Hometerm has also made the no mouse journey more enjoyable than ever before: create, view, organize and navigate your links all from the comfort of the command line! To get started is very simple:
 
 1. Save some links using `touch`.
 2. View your links using `ls`.
