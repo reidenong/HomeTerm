@@ -26,6 +26,11 @@
 
   <a class="github-link" href="https://github.com/reidenong/HomeTerm">Contribute on GitHub</a>
 
+  <script id="wallpapers-manifest" type="application/json">
+["jw.jpg"]
+</script>
+
+
   <script>
     // Wallpaper: try wallpapers/index.json first; else probe common filenames.
     (async function setWallpaper() {
@@ -35,30 +40,43 @@
         document.body.classList.add('has-wallpaper');
       };
 
-      // 1) manifest
+      // 0) Inline <script type="application/json" id="wallpapers-manifest">
+      try {
+        const el = document.getElementById('wallpapers-manifest');
+        if (el && el.textContent.trim()) {
+          const files = JSON.parse(el.textContent);
+          if (Array.isArray(files) && files.length) {
+            const pick = files[Math.floor(Math.random() * files.length)];
+            set(`wallpapers/${encodeURIComponent(pick)}`);
+            return;
+          }
+        }
+      } catch { }
+
+      // 1) External manifest (works only when served over http:// or https://)
       try {
         const res = await fetch('wallpapers/index.json', { cache: 'no-store' });
         if (res.ok) {
           const files = await res.json();
           if (Array.isArray(files) && files.length) {
             const pick = files[Math.floor(Math.random() * files.length)];
-            return set(`wallpapers/${encodeURIComponent(pick)}`);
+            set(`wallpapers/${encodeURIComponent(pick)}`);
+            return;
           }
         }
       } catch { }
 
-      // 2) heuristic guesses (best-effort, first that loads)
-      const names = ['wallpaper', 'background', 'bg'];
-      const exts = ['webp', 'jpg', 'jpeg', 'png'];
-      const nums = Array.from({ length: 24 }, (_, i) => String(i + 1)); // 1..24
+      // 2) Guesses
+      const names = ['wallpaper', 'background', 'bg', 'home', 'default', 'main', 'jw'];
+      const exts = ['webp', 'jpg', 'jpeg', 'png', 'gif', 'avif'];
+      const nums = Array.from({ length: 100 }, (_, i) => String(i + 1));
       const candidates = [
         ...names.flatMap(n => exts.map(e => `${n}.${e}`)),
         ...nums.flatMap(n => exts.map(e => `${n}.${e}`))
       ].map(f => `wallpapers/${f}`);
 
       for (const url of shuffle(candidates)) {
-        const ok = await probe(url);
-        if (ok) { set(url); break; }
+        if (await probe(url)) { set(url); break; }
       }
 
       function probe(url) {
@@ -66,13 +84,10 @@
           const img = new Image();
           img.onload = () => resolve(true);
           img.onerror = () => resolve(false);
-          img.src = url + `?t=${Date.now()}`; // bust cache
+          img.src = url + `?t=${Date.now()}`;
         });
       }
-      function shuffle(a) {
-        for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; }
-        return a;
-      }
+      function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } return a; }
     })();
 
     // Clock + greeting
