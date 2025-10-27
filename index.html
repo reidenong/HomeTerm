@@ -12,17 +12,14 @@
 
 <body class="dark">
 
-  <!-- Home dashboard -->
   <main class="home">
     <section class="center">
       <div id="clock" class="clock">--:--</div>
       <div id="greeting" class="greeting">Good day</div>
     </section>
-
     <footer class="hint">Type any key to open terminal • Press Esc to close</footer>
   </main>
 
-  <!-- Terminal overlay (initially hidden) -->
   <div id="terminal" class="terminal hidden" onclick="focusPrompt()">
     <div id="terminal-content"></div>
   </div>
@@ -30,6 +27,55 @@
   <a class="github-link" href="https://github.com/reidenong/HomeTerm">Contribute on GitHub</a>
 
   <script>
+    // Wallpaper: try wallpapers/index.json first; else probe common filenames.
+    (async function setWallpaper() {
+      const set = (url) => {
+        if (!url) return;
+        document.body.style.backgroundImage = `url("${url}")`;
+        document.body.classList.add('has-wallpaper');
+      };
+
+      // 1) manifest
+      try {
+        const res = await fetch('wallpapers/index.json', { cache: 'no-store' });
+        if (res.ok) {
+          const files = await res.json();
+          if (Array.isArray(files) && files.length) {
+            const pick = files[Math.floor(Math.random() * files.length)];
+            return set(`wallpapers/${encodeURIComponent(pick)}`);
+          }
+        }
+      } catch { }
+
+      // 2) heuristic guesses (best-effort, first that loads)
+      const names = ['wallpaper', 'background', 'bg'];
+      const exts = ['webp', 'jpg', 'jpeg', 'png'];
+      const nums = Array.from({ length: 24 }, (_, i) => String(i + 1)); // 1..24
+      const candidates = [
+        ...names.flatMap(n => exts.map(e => `${n}.${e}`)),
+        ...nums.flatMap(n => exts.map(e => `${n}.${e}`))
+      ].map(f => `wallpapers/${f}`);
+
+      for (const url of shuffle(candidates)) {
+        const ok = await probe(url);
+        if (ok) { set(url); break; }
+      }
+
+      function probe(url) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = url + `?t=${Date.now()}`; // bust cache
+        });
+      }
+      function shuffle(a) {
+        for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; }
+        return a;
+      }
+    })();
+
+    // Clock + greeting
     const clockEl = document.getElementById('clock');
     const greetEl = document.getElementById('greeting');
     const term = document.getElementById('terminal');
@@ -45,59 +91,42 @@
     }
     tick(); setInterval(tick, 30_000);
 
+    // Terminal focus handling
     function getPrompt() {
       return document.getElementById('prompt-input') ||
-        termContent.querySelector('input, [contenteditable="true"]');
+        termContent.querySelector('input,[contenteditable="true"]');
     }
-
     function focusPromptHard() {
       const el = getPrompt();
       if (!el) return false;
       el.focus({ preventScroll: true });
-      // move caret to end
       if ('selectionStart' in el) { const v = el.value; el.selectionStart = el.selectionEnd = v.length; }
       return true;
     }
-
     function showTerminal() {
-      term.classList.remove('hidden');
-      term.classList.add('show');
+      term.classList.remove('hidden'); term.classList.add('show');
       if (typeof window.focusPrompt === 'function') window.focusPrompt();
-      // retry focus a few times in case CLI re-renders
-      let tries = 0;
-      const t = setInterval(() => {
-        if (focusPromptHard() || ++tries >= 10) clearInterval(t);
-      }, 16);
+      let tries = 0; const t = setInterval(() => { if (focusPromptHard() || ++tries >= 10) clearInterval(t); }, 16);
     }
-    function hideTerminal() {
-      term.classList.remove('show');
-      term.classList.add('hidden');
-    }
-
+    function hideTerminal() { term.classList.remove('show'); term.classList.add('hidden'); }
     function isPrintable(e) { return e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey; }
 
-    // MutationObserver: refocus whenever the prompt is replaced while visible
-    new MutationObserver(() => {
-      if (term.classList.contains('show')) focusPromptHard();
-    }).observe(termContent, { childList: true, subtree: true });
+    new MutationObserver(() => { if (term.classList.contains('show')) focusPromptHard(); })
+      .observe(termContent, { childList: true, subtree: true });
 
-    // Open on any key; forward the first character; always keep focus inside terminal
     window.addEventListener('keydown', (e) => {
       const visible = term.classList.contains('show');
-
       if (!visible) {
         if (isPrintable(e) || e.key === 'Backspace' || e.key === 'Enter') {
           e.preventDefault();
           const first = e.key;
           showTerminal();
-          // forward first char after focus lands
           setTimeout(() => {
-            const el = getPrompt();
-            if (!el) return;
+            const el = getPrompt(); if (!el) return;
             if (isPrintable({ key: first, ctrlKey: false, metaKey: false, altKey: false })) {
-              const start = el.selectionStart ?? el.value.length;
-              const end = el.selectionEnd ?? el.value.length;
-              if (typeof el.setRangeText === 'function') el.setRangeText(first, start, end, 'end');
+              const s = el.selectionStart ?? el.value.length;
+              const t = el.selectionEnd ?? el.value.length;
+              if (typeof el.setRangeText === 'function') el.setRangeText(first, s, t, 'end');
               else el.value += first;
               el.dispatchEvent(new Event('input', { bubbles: true }));
             } else if (first === 'Backspace') {
@@ -109,22 +138,11 @@
         }
         return;
       }
-
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        hideTerminal();
-        return;
-      }
-
-      // If terminal is open but focus escaped, pull it back.
-      const active = document.activeElement;
-      if (!term.contains(active)) focusPromptHard();
+      if (e.key === 'Escape') { e.preventDefault(); hideTerminal(); return; }
+      if (!term.contains(document.activeElement)) focusPromptHard();
     });
   </script>
 
-
-
-  <!-- your existing terminal logic -->
   <script src="src/constants.js"></script>
   <script src="src/utils.js"></script>
   <script src="src/localStorageUtils.js"></script>
