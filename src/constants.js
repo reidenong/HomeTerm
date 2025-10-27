@@ -2,11 +2,14 @@
 const LS_KEY = "cli-page-links";
 const LS_THEME_KEY = "cli-page-theme";
 const LS_ENGINE_KEY = "cli-page-engine";
+
 // File Constants
 const types = {
   LINK: "link",
   DIR: "directory",
 };
+
+// Day literals
 const WEEK_DAYS = [
   "monday",
   "tuesday",
@@ -16,12 +19,14 @@ const WEEK_DAYS = [
   "saturday",
   "sunday",
 ];
+
 // Defined Engines
 const ENGINES = {
   google: "https://google.com/search?q=",
   ddg: "https://duckduckgo.com/?q=",
   bing: "https://www.bing.com/search?q=",
 };
+
 // Defined Themes
 const THEMES = [
   "dark",

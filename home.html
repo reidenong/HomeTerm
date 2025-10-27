@@ -5,9 +5,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HomeTerm</title>
+
+  <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png" sizes="512x512" />
+
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Source+Code+Pro:wght@500&display=swap"
     rel="stylesheet" />
+
+  <!-- Styles -->
   <link rel="stylesheet" href="styles.css" />
 </head>
 
@@ -17,19 +23,34 @@
       <div id="clock" class="clock">--:--</div>
       <div id="greeting" class="greeting">Good day</div>
     </section>
-    <footer class="hint">Type any key to open terminal • Press Esc to close</footer>
+    <footer class="hint">
+      Type any key to open terminal • Press Esc to close
+    </footer>
   </main>
 
-  <!-- Terminal overlay (initially hidden) -->
+  <!-- Terminal Overlay -->
   <div id="terminal" class="terminal hidden">
     <div id="terminal-content"></div>
   </div>
 
-  <!-- core terminal logic (your existing files) -->
+  <!-- Wallpaper Manifest -->
   <script id="wallpapers-manifest" type="application/json">
-["avatar.jpg","forest.jpg","fuji.jpg","lake.jpg","mfog.jpg","rice.jpg","river.jpg","road.jpg","rock.jpg","snow.jpg","vol.jpg"]
-</script>
+    [
+      "avatar.jpg",
+      "forest.jpg",
+      "fuji.jpg",
+      "lake.jpg",
+      "mfog.jpg",
+      "rice.jpg",
+      "river.jpg",
+      "road.jpg",
+      "rock.jpg",
+      "snow.jpg",
+      "vol.jpg"
+    ]
+  </script>
 
+  <!-- Core Terminal Scripts -->
   <script src="src/constants.js"></script>
   <script src="src/utils.js"></script>
   <script src="src/localStorageUtils.js"></script>
