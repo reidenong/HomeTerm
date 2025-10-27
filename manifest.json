@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "HomeTerm (Auto New Tab)",
-    "version": "0.1.1",
-    "description": "Replaces new tabs with HomeTerm in a normal tab so focus works.",
+    "name": "HomeTerm, the terminal homepage.",
+    "version": "0.1.2",
+    "description": "A developer friendly browser start page!",
     "background": {
         "service_worker": "sw.js"
     },
