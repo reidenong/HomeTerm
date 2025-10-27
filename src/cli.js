@@ -65,9 +65,9 @@ let commandHistoryCursor = -1;
   // write initial prompt
   const d = new Date();
   const [date, time] = d.toLocaleString().split(" ");
-  textWriter(
-    `It's ${time.slice(0, time.length - 3)} on ${date.replace(",", "")}.`
-  );
+  // textWriter(
+  //   `It's ${time.slice(0, time.length - 3)} on ${date.replace(",", "")}.`
+  // );
   writePrompt();
   // Setup event listener for commands
   document.addEventListener("keydown", handleKeyPresses);

@@ -200,12 +200,22 @@ body.has-wallpaper {
 #terminal-content {
   width: min(86vw, 980px);
   height: min(70vh, 560px);
-  background-color: var(--bg);
-  color: var(--fg);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  /* frosted layer */
+  background: rgba(18, 22, 28, 0.56);
+  /* tint for contrast */
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+
+  /* edges and depth */
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   border-radius: 4px;
-  /* sharp */
-  box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+  /* keep sharp per your spec */
+
+  color: var(--fg);
   padding: 20px 24px;
   overflow: auto;
   line-height: 1.45;
