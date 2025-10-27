@@ -1,15 +1,23 @@
-function openHome() {
-    chrome.tabs.create({ url: chrome.runtime.getURL("home.html") });
+// Open your page instead of Chrome's NTP by closing the new tab and creating ours.
+const HOME_URL = chrome.runtime.getURL("home.html");
+
+// Detect a Chrome New Tab Page (NTP)
+function isNewTab(tab) {
+    const u = tab.pendingUrl || tab.url || "";
+    return u.startsWith("chrome://newtab") || u.startsWith("chrome://new-tab-page") || u === "";
 }
 
-// toolbar click
-if (chrome && chrome.action && chrome.action.onClicked) {
-    chrome.action.onClicked.addListener(openHome);
-}
+chrome.tabs.onCreated.addListener((tab) => {
+    if (!isNewTab(tab)) return;
 
-// keyboard command (guard every access)
-if (chrome && chrome.commands && chrome.commands.onCommand && chrome.commands.onCommand.addListener) {
-    chrome.commands.onCommand.addListener(cmd => {
-        if (cmd === "open-home") openHome();
-    });
-}
+    const id = tab.id;
+    const { windowId, index } = tab;
+
+    // Close the NTP, then create our page. Small delay avoids races.
+    setTimeout(() => {
+        chrome.tabs.remove(id, () => {
+            // Recreate near the same position; keep it active.
+            chrome.tabs.create({ url: HOME_URL, windowId, index, active: true });
+        });
+    }, 0);
+});

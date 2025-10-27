@@ -1,10 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "HomeTerm",
-    "version": "0.1.1",
-    "action": {
-        "default_title": "Open HomeTerm"
-    },
+    "name": "HomeTerm (Auto New Tab)",
+    "version": "0.1.0",
+    "description": "Replaces new tabs with HomeTerm in a normal tab so focus works.",
     "background": {
         "service_worker": "sw.js"
     },
@@ -13,26 +11,5 @@
     ],
     "icons": {
         "128": "media/image.png"
-    },
-    "chrome_url_overrides": {
-        "newtab": "home.html"
-    },
-    "commands": {
-        "open-home": {
-            "suggested_key": {
-                "default": "Alt+H"
-            },
-            "description": "Open HomeTerm"
-        }
-    },
-    "web_accessible_resources": [
-        {
-            "resources": [
-                "wallpapers/*"
-            ],
-            "matches": [
-                "<all_urls>"
-            ]
-        }
-    ]
+    }
 }
