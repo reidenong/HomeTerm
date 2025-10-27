@@ -1,28 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HomeTerm</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@1,500&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body class="dark">
-    <div id="terminal" onclick="focusPrompt()">
-      <div id="terminal-content"></div>
-    </div>
-    <a class="github-link" href="https://github.com/Jaredk3nt/HomeTerm">
-      Contribute on GitHub
-    </a>
 
-    <script src='src/constants.js'></script>
-    <script src="src/utils.js"></script>
-    <script src="src/localStorageUtils.js"></script>
-    <script src="src/writers.js"></script>
-    <script src="src/commands.js"></script>
-    <script src="src/cli.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HomeTerm</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Source+Code+Pro:wght@500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="dark">
+
+  <!-- Home dashboard -->
+  <main class="home">
+    <section class="center">
+      <div id="clock" class="clock">--:--</div>
+      <div id="greeting" class="greeting">Good day</div>
+    </section>
+
+    <footer class="hint">Type any key to open terminal • Press Esc to close</footer>
+  </main>
+
+  <!-- Terminal overlay (initially hidden) -->
+  <div id="terminal" class="terminal hidden" onclick="focusPrompt()">
+    <div id="terminal-content"></div>
+  </div>
+
+  <a class="github-link" href="https://github.com/reidenong/HomeTerm">Contribute on GitHub</a>
+
+  <script>
+    const clockEl = document.getElementById('clock');
+    const greetEl = document.getElementById('greeting');
+    const term = document.getElementById('terminal');
+    const termContent = document.getElementById('terminal-content');
+
+    function tick() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      clockEl.textContent = `${hh}:${mm}`;
+      const d = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+      greetEl.textContent = `Good ${now.getHours() < 12 ? 'morning' : now.getHours() < 18 ? 'afternoon' : 'evening'} • ${d}`;
+    }
+    tick(); setInterval(tick, 30_000);
+
+    function getPrompt() {
+      return document.getElementById('prompt-input') ||
+        termContent.querySelector('input, [contenteditable="true"]');
+    }
+
+    function focusPromptHard() {
+      const el = getPrompt();
+      if (!el) return false;
+      el.focus({ preventScroll: true });
+      // move caret to end
+      if ('selectionStart' in el) { const v = el.value; el.selectionStart = el.selectionEnd = v.length; }
+      return true;
+    }
+
+    function showTerminal() {
+      term.classList.remove('hidden');
+      term.classList.add('show');
+      if (typeof window.focusPrompt === 'function') window.focusPrompt();
+      // retry focus a few times in case CLI re-renders
+      let tries = 0;
+      const t = setInterval(() => {
+        if (focusPromptHard() || ++tries >= 10) clearInterval(t);
+      }, 16);
+    }
+    function hideTerminal() {
+      term.classList.remove('show');
+      term.classList.add('hidden');
+    }
+
+    function isPrintable(e) { return e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey; }
+
+    // MutationObserver: refocus whenever the prompt is replaced while visible
+    new MutationObserver(() => {
+      if (term.classList.contains('show')) focusPromptHard();
+    }).observe(termContent, { childList: true, subtree: true });
+
+    // Open on any key; forward the first character; always keep focus inside terminal
+    window.addEventListener('keydown', (e) => {
+      const visible = term.classList.contains('show');
+
+      if (!visible) {
+        if (isPrintable(e) || e.key === 'Backspace' || e.key === 'Enter') {
+          e.preventDefault();
+          const first = e.key;
+          showTerminal();
+          // forward first char after focus lands
+          setTimeout(() => {
+            const el = getPrompt();
+            if (!el) return;
+            if (isPrintable({ key: first, ctrlKey: false, metaKey: false, altKey: false })) {
+              const start = el.selectionStart ?? el.value.length;
+              const end = el.selectionEnd ?? el.value.length;
+              if (typeof el.setRangeText === 'function') el.setRangeText(first, start, end, 'end');
+              else el.value += first;
+              el.dispatchEvent(new Event('input', { bubbles: true }));
+            } else if (first === 'Backspace') {
+              el.value = el.value.slice(0, -1);
+              el.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            el.focus();
+          }, 0);
+        }
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        hideTerminal();
+        return;
+      }
+
+      // If terminal is open but focus escaped, pull it back.
+      const active = document.activeElement;
+      if (!term.contains(active)) focusPromptHard();
+    });
+  </script>
+
+
+
+  <!-- your existing terminal logic -->
+  <script src="src/constants.js"></script>
+  <script src="src/utils.js"></script>
+  <script src="src/localStorageUtils.js"></script>
+  <script src="src/writers.js"></script>
+  <script src="src/commands.js"></script>
+  <script src="src/cli.js"></script>
+</body>
+
 </html>
