@@ -11,9 +11,10 @@ function list(input) {
     const cursor = path ? locatePath(path) : getCurrentCursor();
     if (locationType(cursor) === types.DIR) {
       return Object.entries(cursor).map(([key, value]) => {
+        const type = locationType(value);
         return {
-          key,
-          type: locationType(value), // Determine if dir or link
+          key: type === types.DIR ? `/${key}` : key,
+          type,
         };
       });
     }
