@@ -1,14 +1,11 @@
 const HOME_URL = chrome.runtime.getURL("home.html");
 const NTP_PREFIXES = ["chrome://newtab", "chrome://new-tab-page"];
 
-function isNtpUrl(u) {
-    return !!u && NTP_PREFIXES.some(p => u.startsWith(p));
-}
+const isNtpUrl = (u) => !!u && NTP_PREFIXES.some((p) => u.startsWith(p));
 
-// Replace *only* genuine NTPs created by Ctrl+T or similar.
 chrome.tabs.onCreated.addListener((tab) => {
     const u = tab.pendingUrl || tab.url || "";
-    if (!isNtpUrl(u)) return;                 // ignore about:blank and external links
+    if (!isNtpUrl(u)) return;
     const { id, windowId, index } = tab;
     setTimeout(() => {
         chrome.tabs.remove(id, () => {
@@ -17,7 +14,6 @@ chrome.tabs.onCreated.addListener((tab) => {
     }, 0);
 });
 
-// Also catch cases where URL changes to NTP after creation.
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (!changeInfo.url) return;
     if (!isNtpUrl(changeInfo.url)) return;

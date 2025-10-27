@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "HomeTerm (Auto New Tab)",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Replaces new tabs with HomeTerm in a normal tab so focus works.",
     "background": {
         "service_worker": "sw.js"
